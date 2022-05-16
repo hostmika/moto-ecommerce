@@ -1,0 +1,21 @@
+package connexion;
+
+import java.sql.*;
+
+public class Connexion
+{
+    public static Connection getConnexion() throws SQLException
+    {
+        Connection connexion = null;
+        try {
+        	Class.forName("com.mysql.jdbc.Driver");
+        	connexion= DriverManager.getConnection("jdbc:mysql://localhost/vente", "root", "root");
+        	connexion.setAutoCommit(false);
+        }
+        catch (ClassNotFoundException e) {
+            e.getMessage();
+        }
+        
+        return connexion;
+    }
+}

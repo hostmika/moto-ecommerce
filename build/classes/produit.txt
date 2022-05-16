@@ -1,0 +1,160 @@
+package produit;
+
+import java.sql.*;
+
+import javax.servlet.http.HttpServletRequest;
+
+import connexion.*;
+import exception.DaoException;
+import exception.JavaBeanException;
+
+public class Produit {
+	
+	private int idProduit;
+	private String nom;
+	private String marque;
+	private String type;
+	private int vitesse;
+	private String fiche;
+	private int prix;
+	private String image;
+	
+	public int getIdProduit() {
+		return idProduit;
+	}
+	public void setIdProduit(int idProduit) {
+		this.idProduit = idProduit;
+	}
+	
+	public String getNom() {
+		return nom;
+	}
+	public void setNom(String nom) {
+		this.nom = nom;
+	}
+	public String getMarque() {
+		return marque;
+	}
+	public void setMarque(String marque) {
+		this.marque = marque;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {		
+			this.type=type;	
+	}
+	public int getVitesse() {
+		return vitesse;
+	}
+	public void setVitesse(int vitesse) throws JavaBeanException {
+		if(vitesse <0) {
+			throw new JavaBeanException("la vitesse doit etre superieure à 0");
+		}
+		else {
+			this.vitesse = vitesse;
+		}
+		
+	}
+	public String getFiche() {
+		return fiche;
+	}
+	public void setFiche(String fiche) {
+		this.fiche = fiche;
+	}
+	public int getPrix() {
+		return prix;
+	}
+	public void setPrix(int prix) throws JavaBeanException{
+		
+		if(prix <= 0) {						
+			throw new JavaBeanException("Prix incorrect");				
+		}
+		else {
+			this.prix = prix;
+		}
+				
+	}
+	public String getImage() {
+		return image;
+	}
+	public void setImage(String image) {
+		this.image = image;
+	}
+	
+	public Produit() {}
+	
+	public Produit(String nom,String marque,String type,int vitesse,String fiche,int prix,String image) throws JavaBeanException {
+		setNom(nom);
+		setMarque(marque);
+		setType(type);
+		setVitesse(vitesse);
+		setFiche(fiche);
+		setPrix(prix);
+		setImage(image);
+		
+	}
+	
+	public Produit(int id,String nom,String marque,String type,int vitesse,String fiche,int prix,String image) throws JavaBeanException {
+		setIdProduit(id);
+		setNom(nom);
+		setMarque(marque);
+		setType(type);
+		setVitesse(vitesse);
+		setFiche(fiche);
+		setPrix(prix);
+		setImage(image);
+		
+	}
+	
+	public Produit(HttpServletRequest request) throws JavaBeanException{
+		setNom(request.getParameter("nom"));
+		setMarque(request.getParameterValues("marque")[0]);
+		setType(request.getParameterValues("type")[0] );
+		setVitesse(Integer.parseInt(request.getParameter("vitesse")));
+		setFiche(request.getParameter("fiche"));
+		setPrix(Integer.parseInt(request.getParameter("prix")));
+		setImage(request.getParameter("image"));
+		
+	}
+	
+	public void inserer() throws DaoException,JavaBeanException{
+		Connection connexion=null;
+		try
+	    {
+		connexion= Connexion.getConnexion();
+	        String req="insert into Produit(id_Produit,Nom,Marque,Type,Vitesse,Fiche,Prix,Image) VALUES(null,?,?,?,?,?,?,?)";
+	        PreparedStatement stmt = connexion.prepareStatement(req);
+	        stmt.setObject(1, this.getNom());
+	        stmt.setObject(2, this.getMarque());
+	        stmt.setObject(3, this.getType());
+	        stmt.setObject(4, this.getVitesse());
+	        stmt.setObject(5, this.getFiche());
+	        stmt.setObject(6, this.getPrix());
+	        stmt.setObject(7, this.getImage());
+	        stmt.executeUpdate();
+	        connexion.commit();
+		    
+	    }
+		catch(SQLException e)
+	    {
+	    		try {
+	    			if(connexion != null) {
+	    				connexion.rollback();
+	    			}
+				} catch (SQLException e1) {	
+				}	
+	    	throw new DaoException("une erreur est survenue au niveau de la base de donnée");
+	    }
+		finally {		
+			try {
+				if(connexion != null) {
+    				connexion.close();
+    			}
+			} catch (SQLException e) {
+				
+				e.printStackTrace();
+			}		
+		}
+	}
+}
